@@ -32,4 +32,46 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      * @var array
      */
     protected $hidden = ['password', 'remember_token'];
+
+    public function profile()
+    {
+        return $this->hasOne('App\Profile');
+    }
+
+     /**
+     * Get the role record associated with the user.
+     */
+    public function role()
+    {
+        return $this->hasOne('App\Role', 'id', 'role_id');
+    }
+
+     /**
+     * Check is the current user has access to the required permission.
+     *
+     * @param $allowed
+     * @return bool
+     */
+    public function checkPermissions($allowed)
+    {
+        echo "<pre>";
+        print_r($allowed);
+        $permissions = $this->role->getPermissionsForModule($allowed[0]);
+        
+        return true;
+    }
+
+    /**
+     * @param $area
+     * @return bool
+     */
+    public function hasAccess($area)
+    {
+        $arr = explode(":", $area);
+        if (! $this->role || ! $this->checkPermissions($arr)) {
+            return false;
+        }
+
+        return true;
+    }
 }
